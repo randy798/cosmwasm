@@ -50,6 +50,8 @@ serializable `ApiError` (dropping runtime info), and back and forth between `Res
 and `ApiResult` (with the same serializable error types).
 - Add `Querier` trait and `QueryRequest` for future query callbacks from the contract,
 along with `SystemError` type for the runtime rejecting messages.
+- Add `staking` feature flag to expose new `StakingMsg` types under `CosmosMsg`
+and new `StakingRequest` types under `QueryRequest`.
 
 **cosmwasm-vm**
 
