@@ -1,8 +1,8 @@
 use snafu::ResultExt;
 
 use cosmwasm_std::{
-    Api, ApiError, Env, HandleResponse, HandleResult, InitResponse, InitResult, QueryResponse,
-    QueryResult, Storage,
+    Api, ApiError, Env, HandleResponse, HandleResult, InitResponse, InitResult, Querier,
+    QueryResponse, QueryResult, Storage,
 };
 
 use crate::errors::{Error, RuntimeErr};
@@ -12,8 +12,8 @@ use crate::serde::{from_slice, to_vec};
 static MAX_LENGTH_INIT_HANDLE: usize = 100_000;
 static MAX_LENGTH_QUERY: usize = 100_000;
 
-pub fn call_init<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_init<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     env: &Env,
     msg: &[u8],
 ) -> Result<Result<InitResponse, ApiError>, Error> {
@@ -23,8 +23,8 @@ pub fn call_init<S: Storage + 'static, A: Api + 'static>(
     Ok(res.into())
 }
 
-pub fn call_handle<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_handle<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     env: &Env,
     msg: &[u8],
 ) -> Result<Result<HandleResponse, ApiError>, Error> {
@@ -34,8 +34,8 @@ pub fn call_handle<S: Storage + 'static, A: Api + 'static>(
     Ok(res.into())
 }
 
-pub fn call_query<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_query<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     msg: &[u8],
 ) -> Result<Result<QueryResponse, ApiError>, Error> {
     let data = call_query_raw(instance, msg)?;
@@ -43,8 +43,8 @@ pub fn call_query<S: Storage + 'static, A: Api + 'static>(
     Ok(res.into())
 }
 
-pub fn call_query_raw<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_query_raw<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     msg: &[u8],
 ) -> Result<Vec<u8>, Error> {
     // we cannot resuse the call_raw functionality as it assumes a param variable... just do it inline
@@ -58,24 +58,24 @@ pub fn call_query_raw<S: Storage + 'static, A: Api + 'static>(
     Ok(data)
 }
 
-pub fn call_init_raw<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_init_raw<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     env: &[u8],
     msg: &[u8],
 ) -> Result<Vec<u8>, Error> {
     call_raw(instance, "init", env, msg)
 }
 
-pub fn call_handle_raw<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+pub fn call_handle_raw<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     env: &[u8],
     msg: &[u8],
 ) -> Result<Vec<u8>, Error> {
     call_raw(instance, "handle", env, msg)
 }
 
-fn call_raw<S: Storage + 'static, A: Api + 'static>(
-    instance: &mut Instance<S, A>,
+fn call_raw<S: Storage + 'static, A: Api + 'static, Q: Querier + 'static>(
+    instance: &mut Instance<S, A, Q>,
     name: &str,
     env: &[u8],
     msg: &[u8],
